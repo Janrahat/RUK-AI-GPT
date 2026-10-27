@@ -124,7 +124,7 @@ class MainActivity : ComponentActivity(), TextToSpeech.OnInitListener {
             })
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ur-PK")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
                 putExtra(RecognizerIntent.EXTRA_PROMPT, "اپنا سوال بولیں")
             }
             speechRecognizer?.startListening(intent)
@@ -167,6 +167,10 @@ private fun RukApp(onPickFile: ((String) -> Unit) -> Unit, onSpeak: (String) -> 
 
     Column(Modifier.fillMaxSize().background(Ink).padding(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Box(Modifier.size(48.dp).background(Color.White, RoundedCornerShape(50)), contentAlignment = Alignment.Center) {
+                Text("⚛", color = Color.Black, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text("RUK AI GPT", color = Gold, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("Chat • Coding • Files • Voice", color = Paper, style = MaterialTheme.typography.bodySmall)
@@ -178,8 +182,8 @@ private fun RukApp(onPickFile: ((String) -> Unit) -> Unit, onSpeak: (String) -> 
                 Text("AI Provider Settings", color = Gold, fontWeight = FontWeight.Bold)
                 OutlinedTextField(endpoint, { endpoint = it }, label = { Text("HTTPS API base URL") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(model, { model = it }, label = { Text("Chat model ID") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(imageModel, { imageModel = it }, label = { Text("Image model ID (اختیاری)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(apiKey, { apiKey = it }, label = { Text("API key — صرف اس سیشن کے لیے") }, modifier = Modifier.fillMaxWidth(), singleLine = true, visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
+                OutlinedTextField(imageModel, { imageModel = it }, label = { Text("Image model ID (optional)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(apiKey, { apiKey = it }, label = { Text("API key (session only)") }, modifier = Modifier.fillMaxWidth(), singleLine = true, visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
                 Button(onClick = { prefs.edit().putString("endpoint", endpoint.trim()).putString("model", model.trim()).putString("image_model", imageModel.trim()).apply(); showSettings = false; status = "Endpoint اور model محفوظ ہوگئے؛ API key محفوظ نہیں کی گئی۔" }, colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = Ink)) { Text("Save endpoint/model") }
                 Text("مفت model کی دستیابی provider پر منحصر ہے۔ عوامی ایپ کے لیے API key کو backend server پر رکھیں؛ فون میں key درج کرنا مکمل محفوظ طریقہ نہیں۔", color = Paper, style = MaterialTheme.typography.bodySmall)
             }
@@ -187,13 +191,13 @@ private fun RukApp(onPickFile: ((String) -> Unit) -> Unit, onSpeak: (String) -> 
         }
         if (generatedImageUrl.isNotBlank()) {
             AsyncImage(model = generatedImageUrl, contentDescription = "AI generated image", modifier = Modifier.fillMaxWidth().heightIn(max = 260.dp))
-            TextButton(onClick = { generatedImageUrl = "" }) { Text("تصویر بند کریں", color = Gold) }
+            TextButton(onClick = { generatedImageUrl = "" }) { Text("Close image", color = Gold) }
         }
         LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 10.dp)) {
-            if (lines.isEmpty()) item { Text("السلام علیکم! میں RUK AI GPT ہوں۔ سوال لکھیں، فائل شامل کریں یا آواز سے پوچھیں۔", color = Paper) }
+            if (lines.isEmpty()) item { Text("Hello! I’m RUK AI. How can I help you today?", color = Paper, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold) }
             itemsIndexed(lines) { _, line ->
                 Column(Modifier.fillMaxWidth().background(if (line.role == "user") Color(0xFF2A281E) else Panel, RoundedCornerShape(12.dp)).padding(12.dp)) {
-                    Text(if (line.role == "user") "آپ" else "RUK AI", color = Gold, fontWeight = FontWeight.Bold)
+                    Text(if (line.role == "user") "You" else "RUK AI", color = Gold, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(4.dp)); Text(line.text, color = Paper)
                     if (line.role == "assistant") TextButton(onClick = { onSpeak(line.text) }) { Text("🔊 جواب سنیں", color = Gold) }
                 }
@@ -201,11 +205,11 @@ private fun RukApp(onPickFile: ((String) -> Unit) -> Unit, onSpeak: (String) -> 
             if (busy) item { CircularProgressIndicator(color = Gold) }
         }
         if (fileText.isNotBlank()) {
-            Text("فائل منسلک ہے (${fileText.length} حروف)", color = Gold)
-            Row { TextButton(onClick = { fileText = "" }) { Text("فائل ہٹائیں", color = Paper) } }
+            Text("File attached (${fileText.length} characters)", color = Gold)
+            Row { TextButton(onClick = { fileText = "" }) { Text("Remove file", color = Paper) } }
         }
         Text(status, color = Gold, style = MaterialTheme.typography.bodySmall)
-        OutlinedTextField(value = prompt, onValueChange = { prompt = it }, modifier = Modifier.fillMaxWidth(), label = { Text("اپنا سوال لکھیں…") }, minLines = 2, maxLines = 5)
+        OutlinedTextField(value = prompt, onValueChange = { prompt = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Message RUK AI...") }, minLines = 2, maxLines = 5)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedButton(onClick = { onPickFile { text -> fileText = text; status = "فائل تیار ہے؛ سوال کے ساتھ بھیجیں۔" } }) { Text("فائل", color = Gold) }
             OutlinedButton(onClick = { onListen { heard -> prompt = if (prompt.isBlank()) heard else "$prompt $heard" } }) { Text("🎙 Voice", color = Gold) }
