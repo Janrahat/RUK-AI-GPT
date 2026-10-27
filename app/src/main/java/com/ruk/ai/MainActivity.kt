@@ -179,7 +179,7 @@ private fun RukApp(onPickFile: ((String) -> Unit) -> Unit, onSpeak: (String) -> 
                 OutlinedTextField(endpoint, { endpoint = it }, label = { Text("HTTPS API base URL") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(model, { model = it }, label = { Text("Chat model ID") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(imageModel, { imageModel = it }, label = { Text("Image model ID (اختیاری)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(apiKey, { apiKey = it }, label = { Text("API key — صرف اس سیشن کے لیے") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(apiKey, { apiKey = it }, label = { Text("API key — صرف اس سیشن کے لیے") }, modifier = Modifier.fillMaxWidth(), singleLine = true, visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
                 Button(onClick = { prefs.edit().putString("endpoint", endpoint.trim()).putString("model", model.trim()).putString("image_model", imageModel.trim()).apply(); showSettings = false; status = "Endpoint اور model محفوظ ہوگئے؛ API key محفوظ نہیں کی گئی۔" }, colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = Ink)) { Text("Save endpoint/model") }
                 Text("مفت model کی دستیابی provider پر منحصر ہے۔ عوامی ایپ کے لیے API key کو backend server پر رکھیں؛ فون میں key درج کرنا مکمل محفوظ طریقہ نہیں۔", color = Paper, style = MaterialTheme.typography.bodySmall)
             }
